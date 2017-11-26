@@ -1,9 +1,44 @@
 package index
 
 import (
+	"crypto/rand"
 	"reflect"
 	"testing"
 )
+
+var (
+	arrayLength64kWidth1 [][]byte
+	arrayLength64kWidth2 [][]byte
+)
+
+func init() {
+	arrayLength64kWidth1 = randArray(1, 1<<16)
+	arrayLength64kWidth2 = randArray(2, 1<<16)
+}
+
+var g int
+
+func BenchmarkCreateIndex(b *testing.B) {
+	var items int
+	for n := 1; n < b.N; n++ {
+		idx := &index{}
+		for i, v := range arrayLength64kWidth1 {
+			idx.add(v, Index(i))
+		}
+		items = len(idx.values)
+	}
+	g = items
+}
+
+func randArray(width, length int) [][]byte {
+	arr := make([][]byte, length)
+	for i := range arr {
+		b := make([]byte, width)
+		_, _ = rand.Read(b)
+		arr[i] = b
+	}
+	return arr
+}
 
 func consume(iter Iter) []Index {
 	var res []Index
